@@ -1,6 +1,6 @@
 // 손끝 트롬본 — MediaPipe Hand Landmarker + Web Audio 로 만든 리듬게임
 // 손(엄지·검지 사이)의 높이 = 음 높이, 엄지+검지 꼬집기 = 불기
-import { SONGS } from './songs.js';
+import { SONGS } from './songs.js?v=2';
 
 const $ = s => document.querySelector(s);
 const canvas = $('#stage');
