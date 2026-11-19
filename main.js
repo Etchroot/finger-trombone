@@ -274,6 +274,8 @@ function finalize(G, n) {
   G.accSum += acc * n.len;
   G.score += Math.round(acc * n.len * 100 * (1 + Math.min(G.combo, 20) * 0.05));
   G.pops.push({ ...JUDGE[j], age: 0, y: yAt(n.p1) });
+  if (j === 'miss') buddy.sad = 0.8;
+  if (j === 'perfect') buddy.happy = 0.4;
 }
 
 function updateGame(dt) {
@@ -619,6 +621,148 @@ function drawPlayfield(dt) {
   }
 }
 
+// ───────────────────────── 나팔이 (오른쪽 위에서 같이 연주하는 친구)
+// 박자에 맞춰 들썩이고, 불면 볼이 부풀고, 손 높이에 따라 슬라이드가 늘었다 줄어요
+const buddy = { puff: 0, sad: 0, happy: 0, notes: [], emit: 0 };
+const INK = '#2a1a5e';
+
+function drawBuddy(now, dt) {
+  const playing = state === 'playing';
+  const beat = playing ? game.beat : now / 500;
+  const on = playing ? game.sounding : state === 'menu' && input.toot;
+  const winded = playing && game.winded;
+  const cool = playing && game.combo >= 8;
+  const hit = playing && game.onTarget === 1;
+  const r = range();
+  const pn = clamp((pitchAtY(input.y) - r.lo) / (r.hi - r.lo), 0, 1);
+  const pulse = Math.exp(-(beat - Math.floor(beat)) * 5);
+  buddy.puff += ((on ? 1 : 0) - buddy.puff) * (1 - Math.exp(-dt * 18));
+  buddy.sad = Math.max(0, buddy.sad - dt);
+  buddy.happy = Math.max(0, buddy.happy - dt);
+  const puff = buddy.puff;
+  const s = clamp(Math.min(W, H) / 720, 0.5, 1.25);
+  const jump = Math.sin(clamp(buddy.happy / 0.4, 0, 1) * Math.PI) * 14;
+  const bodyColor = winded ? '#9db4ff' : '#ffd23f';
+
+  const line = (...p) => { g.beginPath(); g.moveTo(p[0], p[1]); for (let i = 2; i < p.length; i += 2) g.lineTo(p[i], p[i + 1]); g.stroke(); };
+  const blob = (x, y, rx, ry, fill, lw = 4) => {
+    g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+    g.fillStyle = fill; g.fill();
+    if (lw) { g.lineWidth = lw; g.strokeStyle = INK; g.stroke(); }
+  };
+  const pipe = (...p) => { // 금색 관: 어두운 테두리 위에 금색
+    g.lineWidth = 10; g.strokeStyle = INK; line(...p);
+    g.lineWidth = 5; g.strokeStyle = '#ffb703'; line(...p);
+  };
+
+  g.save();
+  g.translate(W - 100 * s, 62 + 96 * s - jump * s);
+  g.scale(s, s);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  g.rotate(Math.sin(beat * Math.PI) * 0.07 + puff * 0.07);
+
+  // 다리 — 왼발로 박자 맞추기
+  const tap = Math.floor(beat) % 2 === 0 ? pulse * 8 : 0;
+  g.lineWidth = 7; g.strokeStyle = INK;
+  line(-18, 56, -22, 82 - tap); line(18, 56, 22, 82);
+  blob(-29, 85 - tap, 13, 6, '#ff4f9a', 3);
+  blob(27, 85, 13, 6, '#ff4f9a', 3);
+
+  // 몸통 — 박자마다 살짝 눌렸다 펴져요
+  g.save();
+  g.translate(0, 70); g.scale(1 + pulse * 0.05 + puff * 0.04, 1 - pulse * 0.06); g.translate(0, -70);
+  blob(0, 0, 58, 64, bodyColor);
+  blob(6, 26, 30, 24, 'rgba(255, 255, 255, 0.28)', 0);
+  // 나비넥타이
+  g.fillStyle = '#ff4f9a'; g.strokeStyle = INK; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(-8, 40); g.lineTo(-24, 31); g.lineTo(-24, 49); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(-8, 40); g.lineTo(8, 31); g.lineTo(8, 49); g.closePath(); g.fill(); g.stroke();
+
+  // 볼
+  blob(-40, 6, 8 + puff * 10, 8 + puff * 9, '#ff7aa8', 0);
+  blob(24, 8, 7 + puff * 5, 7 + puff * 4, '#ff7aa8', 0);
+
+  // 눈
+  const eyes = [[-24, -22], [10, -24]];
+  if (cool) { // 콤보가 이어지면 선글라스
+    g.fillStyle = INK;
+    g.beginPath(); g.roundRect(-42, -34, 32, 22, 8); g.roundRect(-6, -36, 32, 22, 8); g.fill();
+    g.lineWidth = 4; g.strokeStyle = INK; line(-10, -26, -6, -27); line(26, -28, 44, -34);
+    g.lineWidth = 3; g.strokeStyle = 'rgba(255, 255, 255, 0.7)'; line(-36, -28, -30, -22); line(0, -30, 6, -24);
+  } else if (winded) {
+    g.lineWidth = 4; g.strokeStyle = INK;
+    for (const [x, y] of eyes) { line(x - 7, y - 7, x + 7, y + 7); line(x + 7, y - 7, x - 7, y + 7); }
+  } else if (puff > 0.5) { // 힘줘서 부는 눈 > <
+    g.lineWidth = 4; g.strokeStyle = INK;
+    line(-32, -29, -20, -22, -32, -15); line(18, -31, 6, -24, 18, -17);
+  } else {
+    for (const [x, y] of eyes) {
+      blob(x, y, 13, 13, '#fff', 3);
+      const pr = buddy.sad > 0 ? 3.5 : 6;
+      blob(x - 4, y + (0.5 - pn) * 8, pr, pr, INK, 0);
+    }
+    if (buddy.sad > 0) { g.lineWidth = 4; g.strokeStyle = INK; line(-38, -38, -16, -44); line(-2, -46, 22, -40); }
+  }
+  // 땀 한 방울 (틀렸거나 숨찰 때)
+  if (buddy.sad > 0 || winded) {
+    g.fillStyle = '#7fd8ff'; g.strokeStyle = INK; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(42, -50); g.quadraticCurveTo(52, -34, 42, -32); g.quadraticCurveTo(32, -34, 42, -50); g.fill(); g.stroke();
+  }
+  g.restore();
+
+  // 모자 — 박자마다 통통 튀어요
+  g.save();
+  g.translate(4, -60 - pulse * 10 - jump * 0.6); g.rotate(0.14);
+  g.fillStyle = '#ff4f9a'; g.strokeStyle = INK; g.lineWidth = 3;
+  g.beginPath(); g.roundRect(-15, -26, 30, 26, 4); g.fill(); g.stroke();
+  g.fillStyle = '#ffd23f'; g.fillRect(-15, -9, 30, 6);
+  g.lineWidth = 7; line(-25, 0, 25, 0);
+  g.restore();
+
+  // 트롬본 — 손이 높을수록 위로 들리고 슬라이드가 짧아져요
+  g.translate(-50, 8);
+  g.rotate((pn - 0.4) * 0.6 + puff * 0.08);
+  const L = 44 + (1 - pn) * 72;
+  pipe(0, 0, 16, 0, 16, -15, -58, -15);          // 뒤쪽 관
+  pipe(-12, 12, -18 - L, 12, -18 - L, 0, 0, 0);  // 슬라이드
+  g.beginPath();                                  // 나팔
+  g.moveTo(-56, -20); g.quadraticCurveTo(-78, -22, -94, -40);
+  g.lineTo(-94, 10); g.quadraticCurveTo(-78, -8, -56, -10); g.closePath();
+  g.fillStyle = '#ffb703'; g.fill(); g.lineWidth = 3.5; g.strokeStyle = INK; g.stroke();
+  blob(-94, -15, 5, 25, '#e08a00', 3);
+  // 팔 — 슬라이드를 따라 쭉쭉 늘어나요
+  const hx = -18 - L * 0.75;
+  g.lineWidth = 15; g.strokeStyle = INK; line(46, 34, hx, 14);
+  g.lineWidth = 9; g.strokeStyle = bodyColor; line(46, 34, hx, 14);
+  blob(hx, 13, 9, 9, bodyColor, 3);
+
+  // 나팔 입구의 화면 좌표 (음표가 나오는 곳)
+  const m = g.getTransform();
+  const dpr = canvas.width / W;
+  const bx = (m.a * -100 + m.c * -15 + m.e) / dpr, by = (m.b * -100 + m.d * -15 + m.f) / dpr;
+  g.restore();
+
+  // 불 때마다 음표가 튀어나와요
+  buddy.emit -= dt;
+  if (on && buddy.emit <= 0) {
+    buddy.emit = 0.14;
+    buddy.notes.push({
+      x: bx, y: by, vx: -(70 + Math.random() * 90), vy: -(20 + Math.random() * 90) + (0.5 - pn) * 80,
+      life: 1, ch: Math.random() < 0.5 ? '♪' : '♫', color: hit ? '#ffd23f' : playing ? '#ff4f9a' : '#3ef0c0',
+      size: (18 + Math.random() * 12) * s,
+    });
+  }
+  buddy.notes = buddy.notes.filter(n => (n.life -= dt * 1.1) > 0);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const n of buddy.notes) {
+    n.x += n.vx * dt; n.y += n.vy * dt; n.vy += 40 * dt;
+    g.globalAlpha = Math.min(1, n.life * 1.6);
+    g.font = FONT(n.size); g.fillStyle = n.color;
+    g.fillText(n.ch, n.x, n.y);
+  }
+  g.globalAlpha = 1;
+}
+
 let prev = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - prev) / 1000);
@@ -627,6 +771,7 @@ function frame(now) {
   updateInput(now, dt);
   if (state === 'playing') updateGame(dt);
   drawBackground();
+  if (state !== 'intro') drawBuddy(now, dt);
   if (state === 'playing') drawPlayfield(dt);
   drawHand();
   if (state === 'menu' || state === 'playing') drawCursor(now);
