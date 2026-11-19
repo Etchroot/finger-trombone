@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>손끝 트롬본 — 손가락으로 부는 리듬게임</title>
+  <meta name="description" content="웹캠 앞에서 손을 위아래로 움직여 음을 맞추고, 엄지와 검지를 붙여 소리를 내는 리듬게임. 설치 없이 브라우저에서 바로.">
+  <meta property="og:title" content="손끝 트롬본 🎺">
+  <meta property="og:description" content="손 높이 = 음 높이 · 손가락 꼬집기 = 불기. 웹캠만 있으면 되는 리듬게임">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <video id="cam" playsinline muted></video>
+  <canvas id="stage"></canvas>
+
+  <div id="chip" class="chip" hidden></div>
+
+  <!-- 첫 화면 -->
+  <section id="intro" class="screen">
+    <div class="card intro-card">
+      <div class="logo">🎺</div>
+      <h1>손끝 트롬본</h1>
+      <p class="tagline">손 높이가 음 높이! 손가락으로 부는 리듬게임</p>
+      <ol class="how">
+        <li><b>✋ 손을 위아래로</b><span>손이 높으면 높은 음, 낮으면 낮은 음</span></li>
+        <li><b>🤏 엄지+검지 붙이기</b><span>붙이고 있는 동안 소리가 나요</span></li>
+        <li><b>🎵 막대에 맞춰 불기</b><span>흘러오는 막대 높이에 손을 맞춰요</span></li>
+      </ol>
+      <button id="btnCam" class="btn primary">카메라 켜고 시작하기</button>
+      <button id="btnMouse" class="btn ghost">카메라 없이 마우스로 하기</button>
+      <p class="fine">🔒 영상은 내 브라우저 안에서만 분석돼요. 어디에도 전송·저장되지 않아요.<br>🔊 소리가 나요. 스피커나 이어폰을 켜 주세요.</p>
+    </div>
+  </section>
+
+  <!-- 곡 고르기 -->
+  <section id="menu" class="screen" hidden>
+    <div class="card menu-card">
+      <h2>곡 고르기</h2>
+      <p class="hint" id="menuHint">지금 바로 손가락을 붙여서 소리를 내 보세요 🤏</p>
+      <div id="songList" class="songs"></div>
+      <p class="fine">마우스: 위아래로 움직이고 <kbd>클릭</kbd> 또는 <kbd>Space</kbd> 로 불기 · 연주 중 <kbd>Esc</kbd> 나가기</p>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section id="result" class="screen" hidden>
+    <div class="card result-card">
+      <p class="r-song" id="rSong"></p>
+      <div class="grade" id="rGrade">A</div>
+      <p class="r-msg" id="rMsg"></p>
+      <div class="stats">
+        <div><span>점수</span><b id="rScore">0</b></div>
+        <div><span>정확도</span><b id="rAcc">0%</b></div>
+        <div><span>최대 콤보</span><b id="rCombo">0</b></div>
+      </div>
+      <div class="judges" id="rJudges"></div>
+      <div class="row">
+        <button id="btnRetry" class="btn primary">다시 하기</button>
+        <button id="btnMenu" class="btn ghost">곡 고르기</button>
+        <button id="btnShare" class="btn ghost">링크 복사</button>
+      </div>
+    </div>
+  </section>
+
+  <button id="btnQuit" class="quit" hidden>✕ 나가기</button>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
