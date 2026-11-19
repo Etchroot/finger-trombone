@@ -1,6 +1,6 @@
 // 손끝 트롬본 — MediaPipe Hand Landmarker + Web Audio 로 만든 리듬게임
 // 손(엄지·검지 사이)의 높이 = 음 높이, 엄지+검지 꼬집기 = 불기
-import { SONGS } from './songs.js?v=2';
+import { SONGS } from './songs.js?v=3';
 
 const $ = s => document.querySelector(s);
 const canvas = $('#stage');
@@ -257,6 +257,9 @@ function stopSong() {
   game = null;
 }
 
+// 숨: 계속 불면 BREATH_OUT 초에 바닥, 손가락을 떼면 BREATH_IN 초에 가득. 바닥나면 BREATH_BACK 만큼 찰 때까지 소리가 안 나요
+const BREATH_OUT = 4, BREATH_IN = 0.5, BREATH_BACK = 0.4;
+
 const JUDGE = {
   perfect: { text: '완벽!', color: '#ffd23f' },
   good: { text: '좋아요', color: '#3ef0c0' },
@@ -290,11 +293,11 @@ function updateGame(dt) {
 
   // 숨: 계속 불면 바닥나요 → 손가락을 떼면 금방 차요
   if (input.toot && !G.winded) {
-    G.breath -= dt / 10;
+    G.breath -= dt / BREATH_OUT;
     if (G.breath <= 0) { G.breath = 0; G.winded = true; }
   } else {
-    G.breath = Math.min(1, G.breath + dt / 1.5);
-    if (G.winded && !input.toot && G.breath > 0.2) G.winded = false;
+    G.breath = Math.min(1, G.breath + dt / BREATH_IN);
+    if (G.winded && !input.toot && G.breath > BREATH_BACK) G.winded = false;
   }
   G.sounding = input.toot && !G.winded;
 
@@ -441,7 +444,7 @@ function updateInput(now, dt) {
     if (n) {
       const prog = clamp((jb - n.start) / n.len, 0, 1);
       ty = yAt(n.p0 + (n.p1 - n.p0) * smooth(prog));
-      toot = jb >= n.start - 0.05 && prog < 0.97;
+      toot = jb >= n.start - 0.05 && prog < 0.88; // 음 끝에서 숨 쉬기
       speed = 200;
     } else toot = false;
   }

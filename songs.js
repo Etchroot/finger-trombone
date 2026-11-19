@@ -71,6 +71,51 @@ export const SONGS = [
     chords: `C F/C F/C G/C | C/F C/G C/F C/G | C F/C F/C G/C`,
   }),
   song({
+    id: 'plane',
+    title: '비행기',
+    sub: '미국 동요 · Mary Had a Little Lamb',
+    level: 1,
+    bpm: 108,
+    melody: `
+      E4:1 D4:1 C4:1 D4:1 | E4:1 E4:1 E4:2 | D4:1 D4:1 D4:2 | E4:1 G4:1 G4:2 |
+      E4:1 D4:1 C4:1 D4:1 | E4:1 E4:1 E4:1 E4:1 | D4:1 D4:1 E4:1 D4:1 | C4:2 C4>G4:2`,
+    chords: `C C G C | C C G C`,
+  }),
+  song({
+    id: 'bridge',
+    title: '런던 다리',
+    sub: '영국 전래 동요',
+    level: 1,
+    bpm: 112,
+    melody: `
+      G4:1.5 A4:.5 G4:1 F4:1 | E4:1 F4:1 G4:2 | D4:1 E4:1 F4:2 | E4:1 F4:1 G4:2 |
+      G4:1.5 A4:.5 G4:1 F4:1 | E4:1 F4:1 G4:2 | D4:2 G4:2 | E4:1 C4:3`,
+    chords: `C C G C | C C G C`,
+  }),
+  song({
+    id: 'jacques',
+    title: '자크 형제',
+    sub: '프랑스 전래 동요 · Frère Jacques',
+    level: 2,
+    bpm: 104,
+    melody: `
+      C4:1 D4:1 E4:1 C4:1 | C4:1 D4:1 E4:1 C4:1 | E4:1 F4:1 G4:2 | E4:1 F4:1 G4:2 |
+      G4:.5 A4:.5 G4:.5 F4:.5 E4:1 C4:1 | G4:.5 A4:.5 G4:.5 F4:.5 E4:1 C4:1 |
+      C4:1 G3:1 C4:2 | C4:1 G3:1 C4:2`,
+    chords: `C C C C | C C C C`,
+  }),
+  song({
+    id: 'yankee',
+    title: '양키 두들',
+    sub: '미국 전래 민요',
+    level: 2,
+    bpm: 132,
+    melody: `
+      C4:1 C4:1 D4:1 E4:1 | C4:1 E4:1 D4:1 G3:1 | C4:1 C4:1 D4:1 E4:1 | C4:2 B3:2 |
+      C4:1 C4:1 D4:1 E4:1 | F4:1 E4:1 D4:1 C4:1 | B3:1 G3:1 A3:1 B3:1 | C4:2 C4>G4:2`,
+    chords: `C C/G C G | C F G C`,
+  }),
+  song({
     id: 'ode',
     title: '환희의 송가',
     sub: '베토벤 · 교향곡 9번',
@@ -95,5 +140,19 @@ export const SONGS = [
       E4:1 E4:1 E4:2 | E4:1 E4:1 E4:2 | E4:1 G4:1 C4:1.5 D4:.5 | E4:4 |
       F4:1 F4:1 F4:1.5 F4:.5 | F4:1 E4:1 E4:1 E4:.5 E4:.5 | G4:1 G4:1 F4:1 D4:1 | C4:2 C4>C5:2`,
     chords: `C C C C | F C G G | C C C C | F C G C`,
+  }),
+  song({
+    id: 'susanna',
+    title: '오! 수재너',
+    sub: '포스터 · 1848',
+    level: 3,
+    bpm: 116,
+    melody: `
+      R:3 C4>D4:1 |
+      E4:1 G4:1 G4:1.5 A4:.5 | G4:1 E4:1 C4:1.5 D4:.5 | E4:1 E4:1 D4:1 C4:1 | D4:3 C4>D4:1 |
+      E4:1 G4:1 G4:1.5 A4:.5 | G4:1 E4:1 C4:1.5 D4:.5 | E4:1 E4:1 D4:1 D4:1 | C4:4 |
+      F4:2 F4:2 | A4:1 A4:2 A4:1 | G4:1 G4:1 E4:1 C4:1 | D4:3 C4>D4:1 |
+      E4:1 G4:1 G4:1.5 A4:.5 | G4:1 E4:1 C4:1.5 D4:.5 | E4:1 E4:1 D4:1 D4:1 | C4:2 C4>C5:2`,
+    chords: `C | C C C G | C C C/G C | F F C G | C C C/G C`,
   }),
 ];
